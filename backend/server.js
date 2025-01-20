@@ -17,7 +17,7 @@ const workoutRoutes = require("./routes/workouts");
 const app = express();
 
 // Middleware:
-// any code that executes between us getting a request on the server
+// any code that executes between us getting a request on the server;
 // and us sending a response back to the client
 
 // Parse and attach data sent to server to request object
