@@ -3,7 +3,10 @@ const mongoose = require("mongoose");
 
 // Get all workouts
 const getWorkouts = async (req, res) => {
-  const workouts = await Workout.find({}).sort({ createdAt: -1 }); // descending order
+
+  const user_id = req.user._id;
+
+  const workouts = await Workout.find({user_id}).sort({ createdAt: -1 }); // descending order
   res.status(200).json(workouts);
 };
 
@@ -43,7 +46,8 @@ const createWorkout = async (req, res) => {
   }
 
   try {
-    const workout = await Workout.create({ title, reps, load });
+    const user_id = req.user._id;
+    const workout = await Workout.create({ title, reps, load, user_id });
     res.status(200).json(workout);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -66,20 +70,23 @@ const deleteWorkout = async (req, res) => {
 // Update a workout
 const updateWorkout = async (req, res) => {
   const { id } = req.params;
+
+  // Ensure the ID is valid
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ error: "Invalid ID" });
+      return res.status(404).json({ error: 'No such workout' });
   }
-  const workout = await Workout.findOneAndUpdate(
-    { _id: id },
-    {
-      ...req.body,
-    }
-  );
+
+  // Update the workout
+  const workout = await Workout.findOneAndUpdate({ _id: id }, { ...req.body }, { new: true });
+
   if (!workout) {
-    return res.status(400).json({ error: "Workout not found" });
+      return res.status(404).json({ error: 'No such workout' });
   }
+
   res.status(200).json(workout);
 };
+
+
 
 module.exports = {
   getWorkouts,
